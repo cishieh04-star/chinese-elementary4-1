@@ -746,6 +746,10 @@ rt{color:#c2417a}
 .tro{background:#fff;border-radius:1.2rem;padding:.8rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;box-shadow:0 .3rem 0 rgba(0,0,0,.12);border:.18rem solid #ffd24d;font:inherit;cursor:pointer}
 .tro .te{font-size:3.6rem;line-height:1.1}.tro.on .te{animation:bounce 1.6s infinite}.tro .tn{font-weight:900;font-size:1rem}.tro .tc{font-size:.85rem;opacity:.7}
 .tro.off{filter:grayscale(1);opacity:.55;border-color:#ccc}
+.tbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:.8rem;justify-content:center;padding:.7rem .8rem calc(.7rem + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.96);border-top:.2rem solid #e3e3e3;box-shadow:0 -.3rem .8rem rgba(0,0,0,.12)}
+.tbar .btn{flex:1;max-width:14rem;font-size:1.2rem}
+.tshelf{padding-bottom:5.5rem}
+body:has(.tbar) .scrollcue{display:none!important}
 .opt{position:relative}.opt .osp{flex:none;margin-left:auto;font-size:1.15rem;line-height:1;padding:.4rem .55rem;border-radius:.9rem;background:#eef6ff;box-shadow:0 .15rem 0 #b9cde6}
 .opt.big .osp,.tfo .opt .osp{position:absolute;right:.35rem;top:.35rem;margin:0}
 .opt.gone .osp{display:none}
@@ -1210,14 +1214,15 @@ function garden(){const n=netsOf(),pc=(S.coins%10)*10;
   bindBack(hub);$('#cert').onclick=()=>trophyScreen(n)}
 const TROPHIES=[[1,'🥉','銅牌小獎盃'],[3,'🥈','銀牌小獎盃'],[5,'🥇','金牌小獎盃'],[10,'🏆','閃亮大獎盃'],[20,'💎','鑽石獎盃'],[30,'👑','國王皇冠'],[50,'🌟','超級明星獎']];
 function trophyOffer(n){const t=TROPHIES.filter(x=>x[0]<=n).pop();if(!t)return;
-  const m=modal(`<div style="font-size:4.4rem;animation:bounce 1s infinite">${t[1]}</div><h2>太棒了！得到獎盃！</h2><div>${T('你的糖果屋有 '+n+' 間小屋，你得到「'+t[2]+'」！')}</div><div class="row"><button class="btn w" id="x">好棒喔</button><button class="btn g" id="v">🏆 看獎盃櫃</button></div>`);
-  sfx('lvl');confetti(40);later(()=>say(S.name+'，太棒了！你得到'+t[2]+'！'),400);
-  $('#x',m.el).onclick=m.close;$('#v',m.el).onclick=()=>{m.close();trophyScreen(n)}}
+  const m=modal(`<div style="font-size:4.4rem;animation:bounce 1s infinite">${t[1]}</div><h2>太棒了！得到獎盃！</h2><div>${T('你的糖果屋有 '+n+' 間小屋，你得到「'+t[2]+'」！')}</div><div class="hint" style="margin:.5rem 0">${T('獎盃已經收好了，等一下回到地圖就能看。')}</div><div class="row" style="justify-content:center"><button class="btn g big" id="x">▶ 繼續玩</button></div>`);
+  sfx('lvl');confetti(40);later(()=>say(S.name+'，太棒了！你得到'+t[2]+'！請按綠色的大按鈕，繼續玩。'),400);
+  $('#x',m.el).onclick=m.close}
 function trophyScreen(n){const got=TROPHIES.filter(x=>x[0]<=n),nxt=TROPHIES.find(x=>x[0]>n);
   const el=go(`${hudHTML({title:'🏆 我的獎盃櫃',back:true,prog:got.length+'/'+TROPHIES.length})}<div class="page"><div class="wrap">
   <div class="card" style="text-align:center"><h3>${esc(S.name||'小朋友')} 的獎盃櫃</h3><div class="hint">${nxt?T('再收集到 '+nxt[0]+' 個，就會得到「'+nxt[2]+'」！'):T('所有的獎盃都拿到了，你真是太厲害了！')} ${spk(nxt?'再收集到'+nxt[0]+'個，就會得到'+nxt[2]:'所有的獎盃都拿到了，你真是太厲害了')}</div></div>
-  <div class="tshelf">${TROPHIES.map(t=>{const ok=t[0]<=n;return `<button class="tro ${ok?'on':'off'}" data-say="${ok?esc('你得到'+t[2]+'！'):esc('收集到'+t[0]+'個，就會得到'+t[2])}"><span class="te">${ok?t[1]:'🔒'}</span><span class="tn">${T(t[2])}</span><span class="tc">${ok?'已得到':'集滿 '+t[0]+' 個'}</span></button>`}).join('')}</div></div></div>`,'stage');
-  bindBack(garden);later(()=>say('這是你的獎盃櫃。你已經得到'+got.length+'座獎盃。'),350)}
+  <div class="tshelf">${TROPHIES.map(t=>{const ok=t[0]<=n;return `<button class="tro ${ok?'on':'off'}" data-say="${ok?esc('你得到'+t[2]+'！'):esc('收集到'+t[0]+'個，就會得到'+t[2])}"><span class="te">${ok?t[1]:'🔒'}</span><span class="tn">${T(t[2])}</span><span class="tc">${ok?'已得到':'集滿 '+t[0]+' 個'}</span></button>`}).join('')}</div></div></div><div class="tbar"><button class="btn w big" id="tMap">🗺️ 回地圖</button>${(SES&&SES.stage&&stageOf(SES.stage))?'<button class="btn g big" id="tAgain">▶ 繼續玩</button>':''}</div>`,'stage');
+  bindBack(()=>hub());$('#tMap').onclick=()=>hub();const ta=$('#tAgain');if(ta)ta.onclick=()=>launch(SES.stage);
+  later(()=>say('這是你的獎盃櫃。你已經得到'+got.length+'座獎盃。想繼續玩，請按下面的大按鈕。'),350)}
 /* ====== 徽章 ====== */
 function badgeScreen(){const got=BADGES.filter(b=>S.badges[b.id]).length;
   go(`${hudHTML({title:'🏅 徽章牆',back:true,pg:true,prog:got+'/'+BADGES.length})}<div class="page"><div class="wrap"><div class="bgrid">${BADGES.map(b=>`<div class="badge ${S.badges[b.id]?'':'no'}"><span class="e">${b.e}</span><b>${T(b.n)}</b><div class="hint">${T(b.d)}</div></div>`).join('')}</div></div></div>`,'stage');bindBack(hub)}
